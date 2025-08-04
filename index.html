@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דשבורד נתוני רצח בישראל 2021-2025</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Recharts -->
+    <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
+    
+    <!-- Babel Standalone for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        .recharts-wrapper {
+            direction: ltr;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell, ComposedChart, ResponsiveContainer } = Recharts;
+
+        const Dashboard = () => {
+            const [selectedView, setSelectedView] = useState('overview');
+
+            // נתונים כלליים
+            const yearlyData = [
+                { year: '2021', events: 161, victims: 173, jews: 36, arabs: 115, others: 10 },
+                { year: '2022', events: 142, victims: 148, jews: 36, arabs: 103, others: 3 },
+                { year: '2023', events: 274, victims: 300, jews: 47, arabs: 210, others: 17 },
+                { year: '2024', events: 263, victims: 282, jews: 38, arabs: 206, others: 19 }
+            ];
+
+            // נתונים מתחילת 2025
+            const data2025 = {
+                events: 51,
+                victims: 58,
+                jews: 8,
+                arabs: 40,
+                others: 3
+            };
+
+            // נתונים לפי מחוז (ממוצע שנתי 2021-2024) - מחוזות נבחרים
+            const districtData = [
+                { district: 'חוף', total: 58, jews: 9, arabs: 47, others: 2 },
+                { district: 'מרכז', total: 46, jews: 12, arabs: 32, others: 2 },
+                { district: 'צפון', total: 45, jews: 2, arabs: 42, others: 1 },
+                { district: 'דרום', total: 29, jews: 9, arabs: 19, others: 2 }
+            ];
+
+            // נתונים מתוקננים לאוכלוסייה - מחוזות נבחרים
+            const normalizedData = [
+                { district: 'חוף', jews_per_100k: 1, arabs_per_100k: 12, total_per_100k: 4 },
+                { district: 'מרכז', jews_per_100k: 1, arabs_per_100k: 16, total_per_100k: 2 },
+                { district: 'צפון', jews_per_100k: 0, arabs_per_100k: 6, total_per_100k: 3 },
+                { district: 'דרום', jews_per_100k: 1, arabs_per_100k: 6, total_per_100k: 2 }
+            ];
+
+            // נתוני פענוח
+            const solvingRatesYearly = [
+                { year: '2021', jews: 78, arabs: 30, others: 80, total: 43 },
+                { year: '2022', jews: 72, arabs: 23, others: 67, total: 37 },
+                { year: '2023', jews: 66, arabs: 16, others: 71, total: 28 },
+                { year: '2024', jews: 50, arabs: 18, others: 63, total: 26 }
+            ];
+
+            // נתוני פענוח לפי מחוז
+            const solvingByDistrict = [
+                { district: 'צפון', jews_solved: 7, jews_unsolved: 2, arabs_solved: 21, arabs_unsolved: 159 },
+                { district: 'חוף', jews_solved: 22, jews_unsolved: 14, arabs_solved: 42, arabs_unsolved: 156 },
+                { district: 'מרכז', jews_solved: 32, jews_unsolved: 16, arabs_solved: 18, arabs_unsolved: 123 },
+                { district: 'דרום', jews_solved: 21, jews_unsolved: 14, arabs_solved: 25, arabs_unsolved: 53 }
+            ];
+
+            const COLORS = ['#16a34a', '#2563eb', '#dc2626', '#ea580c']; // Green, Blue, Red, Orange
+
+            const renderOverview = () => (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h3 className="text-lg font-semibold text-blue-900">סה"כ אירועי רצח</h3>
+                            <p className="text-2xl font-bold text-blue-700">891</p>
+                            <p className="text-sm text-blue-600">2021 - מרץ 2025</p>
+                        </div>
+                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                            <h3 className="text-lg font-semibold text-red-900">סה"כ קורבנות</h3>
+                            <p className="text-2xl font-bold text-red-700">961</p>
+                            <p className="text-sm text-red-600">2021 - מרץ 2025</p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <h3 className="text-lg font-semibold text-green-900">שיעור פענוח כללי</h3>
+                            <p className="text-2xl font-bold text-green-700">32%</p>
+                            <p className="text-sm text-green-600">2021-2024</p>
+                        </div>
+                        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                            <h3 className="text-lg font-semibold text-orange-900">אירועים ב-2025</h3>
+                            <p className="text-2xl font-bold text-orange-700">51</p>
+                            <p className="text-sm text-orange-600">עד 10 במרץ</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h3 className="text-xl font-bold mb-4">מספר אירועי רצח וקורבנות לפי שנה</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <ComposedChart data={yearlyData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="year" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Bar dataKey="events" fill="#2563eb" name="אירועי רצח" />
+                                    <Line type="monotone" dataKey="victims" stroke="#dc2626" strokeWidth={3} name="קורבנות" />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-lg shadow-md">
+                            <h3 className="text-xl font-bold mb-4">התפלגות לפי מגזר (2021-2024)</h3>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: 'ערבים', value: 75 },
+                                            { name: 'יהודים', value: 19 },
+                                            { name: 'אחרים', value: 6 }
+                                        ]}
+                                        cx="50%"
+                                        cy="50%"
+                                        labelLine={false}
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                    >
+                                        {[
+                                            { name: 'ערבים', value: 75 },
+                                            { name: 'יהודים', value: 19 },
+                                            { name: 'אחרים', value: 6 }
+                                        ].map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderTrendAnalysis = () => (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">מגמת אירועי רצח לפי מגזר</h3>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <LineChart data={yearlyData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="year" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="jews" stroke="#2563eb" strokeWidth={3} name="יהודים" />
+                                <Line type="monotone" dataKey="arabs" stroke="#16a34a" strokeWidth={3} name="ערבים" />
+                                <Line type="monotone" dataKey="others" stroke="#dc2626" strokeWidth={3} name="אחרים" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                        <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+                            <p className="text-sm text-yellow-800">
+                                <strong>תובנות מרכזיות:</strong> בשנת 2023 חלה עלייה של מעל 100% באירועי רצח במגזר הערבי
+                                (מ-103 ב-2022 ל-210 ב-2023). במגזר היהודי העלייה הייתה מתונה יותר (מ-36 ל-47).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderDistrictAnalysis = () => (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">ממוצע שנתי של אירועי רצח לפי מגזר במחוזות נבחרים</h3>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={districtData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="district" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="jews" stackId="a" fill="#2563eb" name="יהודים" />
+                                <Bar dataKey="arabs" stackId="a" fill="#16a34a" name="ערבים" />
+                                <Bar dataKey="others" stackId="a" fill="#dc2626" name="אחרים" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">אירועי רצח לכל 100,000 תושבים במחוזות נבחרים</h3>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={normalizedData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="district" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="jews_per_100k" fill="#2563eb" name="יהודים (לכל 100K)" />
+                                <Bar dataKey="arabs_per_100k" fill="#16a34a" name="ערבים (לכל 100K)" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                        <div className="mt-4 p-4 bg-red-50 rounded-lg">
+                            <p className="text-sm text-red-800">
+                                <strong>פער משמעותי:</strong> ממוצע של 8 אירועי רצח לכל 100,000 תושבים ערבים לעומת 
+                                1 אירוע רצח לכל 100,000 יהודים בשנה.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderSolvingRates = () => (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">שיעורי פענוח לפי שנה ומגזר</h3>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <LineChart data={solvingRatesYearly}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="year" />
+                                <YAxis />
+                                <Tooltip formatter={(value) => `${value}%`} />
+                                <Legend />
+                                <Line type="monotone" dataKey="jews" stroke="#2563eb" strokeWidth={3} name="יהודים" />
+                                <Line type="monotone" dataKey="arabs" stroke="#16a34a" strokeWidth={3} name="ערבים" />
+                                <Line type="monotone" dataKey="others" stroke="#dc2626" strokeWidth={3} name="אחרים" />
+                                <Line type="monotone" dataKey="total" stroke="#6b7280" strokeWidth={2} strokeDasharray="5 5" name="ממוצע כללי" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                                <p className="font-semibold text-blue-900">שיעור פענוח יהודים</p>
+                                <p className="text-2xl font-bold text-blue-700">65%</p>
+                                <p className="text-sm text-blue-600">2021-2024</p>
+                            </div>
+                            <div className="bg-green-50 p-3 rounded-lg">
+                                <p className="font-semibold text-green-900">שיעור פענוח ערבים</p>
+                                <p className="text-2xl font-bold text-green-700">20%</p>
+                                <p className="text-sm text-green-600">2021-2024</p>
+                            </div>
+                            <div className="bg-red-50 p-3 rounded-lg">
+                                <p className="font-semibold text-red-900">שיעור פענוח אחרים</p>
+                                <p className="text-2xl font-bold text-red-700">67%</p>
+                                <p className="text-sm text-red-600">2021-2024</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">שיעורי פענוח לפי מחוז ומגזר (2021-2024)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {solvingByDistrict.map((district) => {
+                                const jewsSolveRate = Math.round((district.jews_solved / (district.jews_solved + district.jews_unsolved)) * 100);
+                                const arabsSolveRate = Math.round((district.arabs_solved / (district.arabs_solved + district.arabs_unsolved)) * 100);
+                                
+                                return (
+                                    <div key={district.district} className="border rounded-lg p-4">
+                                        <h4 className="font-bold text-lg mb-3">{district.district}</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-blue-700">יהודים:</span>
+                                                <span className="font-bold text-blue-700">{jewsSolveRate}%</span>
+                                            </div>
+                                            <div className="w-full bg-blue-200 rounded-full h-2">
+                                                <div className="bg-blue-600 h-2 rounded-full" style={{width: `${jewsSolveRate}%`}}></div>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-green-700">ערבים:</span>
+                                                <span className="font-bold text-green-700">{arabsSolveRate}%</span>
+                                            </div>
+                                            <div className="w-full bg-green-200 rounded-full h-2">
+                                                <div className="bg-green-600 h-2 rounded-full" style={{width: `${arabsSolveRate}%`}}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const render2025Data = () => (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-bold mb-4">נתוני 2025 (עד 10 במרץ)</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie
+                                            data={[
+                                                { name: 'ערבים', value: data2025.arabs },
+                                                { name: 'יהודים', value: data2025.jews },
+                                                { name: 'אחרים', value: data2025.others }
+                                            ]}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {[
+                                                { name: 'ערבים', value: data2025.arabs },
+                                                { name: 'יהודים', value: data2025.jews },
+                                                { name: 'אחרים', value: data2025.others }
+                                            ].map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold">סיכום תקופת 2025</h4>
+                                    <ul className="mt-2 space-y-1 text-sm">
+                                        <li>• <strong>51 אירועי רצח</strong> (58 קורבנות)</li>
+                                        <li>• <strong>78% ערבים</strong> (40 אירועים)</li>
+                                        <li>• <strong>16% יהודים</strong> (8 אירועים)</li>
+                                        <li>• <strong>6% אחרים</strong> (3 אירועים)</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-yellow-50 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-yellow-800">שיעור פענוח ב-2025</h4>
+                                    <p className="text-2xl font-bold text-yellow-700">12%</p>
+                                    <p className="text-sm text-yellow-600 mt-1">6 מתוך 51 אירועים</p>
+                                    <div className="mt-2 text-sm">
+                                        <p>• יהודים: 38% (3/8)</p>
+                                        <p>• ערבים: 8% (3/40)</p>
+                                        <p>• אחרים: 0% (0/3)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-100 p-4" dir="rtl">
+                    <div className="max-w-7xl mx-auto">
+                        <header className="mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                                ניתוח נתונים על אירועי רצח בישראל
+                            </h1>
+                            <p className="text-gray-600">
+                                מתחילת שנת 2021 עד 10 במרץ 2025 | מקור: משטרת ישראל
+                            </p>
+                        </header>
+
+                        <nav className="mb-8">
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => setSelectedView('overview')}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedView === 'overview'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    סקירה כללית
+                                </button>
+                                <button
+                                    onClick={() => setSelectedView('trends')}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedView === 'trends'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    מגמות לפי זמן
+                                </button>
+                                <button
+                                    onClick={() => setSelectedView('districts')}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedView === 'districts'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    ניתוח לפי מחוז
+                                </button>
+                                <button
+                                    onClick={() => setSelectedView('solving')}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedView === 'solving'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    שיעורי פענוח
+                                </button>
+                                <button
+                                    onClick={() => setSelectedView('2025')}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                        selectedView === '2025'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    נתוני 2025
+                                </button>
+                            </div>
+                        </nav>
+
+                        <main>
+                            {selectedView === 'overview' && renderOverview()}
+                            {selectedView === 'trends' && renderTrendAnalysis()}
+                            {selectedView === 'districts' && renderDistrictAnalysis()}
+                            {selectedView === 'solving' && renderSolvingRates()}
+                            {selectedView === '2025' && render2025Data()}
+                        </main>
+
+                        <footer className="mt-12 p-4 bg-white rounded-lg shadow-md">
+                            <p className="text-sm text-gray-600 text-center">
+                                <strong>מקור:</strong>{' '}
+                                <a 
+                                    href="https://main.knesset.gov.il/activity/info/research/pages/incident.aspx?docid=48e639b1-f20a-f011-a857-005056aa1f91" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 underline"
+                                    title="ניתוח נתונים על אירועי רצח בישראל מתחילת שנת 2021 עד 10 במרץ 2025"
+                                >
+                                    "ניתוח נתונים על אירועי רצח בישראל מתחילת שנת 2021 עד 10 במרץ 2025"
+                                </a>
+                                {' '}| הכנסת - מרכז המחקר והמידע | 
+                                כתיבה: רמי שוורץ | אישור: אורלי אלמגור לוטן | 
+                                תאריך: י"ג באייר תשפ"ה, 11 במאי 2025
+                            </p>
+                        </footer>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<Dashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
